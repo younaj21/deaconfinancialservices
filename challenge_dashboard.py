@@ -4,6 +4,8 @@ import pickle
 import pandas as pd
 from statsmodels.iolib.smpickle import load_pickle
 import statsmodels.api as sm
+import requests
+import os
 
 # Things to do and add for this app
 #1. Import the real model
@@ -20,12 +22,46 @@ import statsmodels.api as sm
 # Fix the Jan, January situation
 # FOr these categorical ones make sure to remove the option to even select them from the model
 
-# Import the model
-loaded_model = load_pickle("analytics_challenge_model_test.pickle")
-
 
 # Page configuration
 st.set_page_config(page_title="Logistic Regression Predictor", layout="wide")
+
+@st.cache_resource
+def download_model_from_gdrive(file_id, destination):
+    """Download file from Google Drive"""
+    URL = "https://drive.google.com/file/d/1t1pEtXXkNQwxvZynEW4O7usNpmm6k51r/view?usp=sharing"
+    
+    session = requests.Session()
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    
+    # Handle large files that require confirmation
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            params = {'id': file_id, 'confirm': value}
+            response = session.get(URL, params=params, stream=True)
+    
+    # Save the file
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+
+@st.cache_resource
+def load_model():
+    """Load the model, downloading from Google Drive if necessary"""
+    model_path = "analytics_challenge_model_test.pickle"
+    
+    # If model doesn't exist locally, download it
+    if not os.path.exists(model_path):
+        file_id = "1t1pEtXXkNQwxvZynEW4O7usNpmm6k51r"  # Replace with your actual file ID
+        with st.spinner("Downloading model from Google Drive..."):
+            download_model_from_gdrive(file_id, model_path)
+    
+    return load_pickle(model_path)
+
+# Load the model
+model = load_model()
+loaded_model = model
 
 def prepare_model_input(input_values, all_features):
     """
