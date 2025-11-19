@@ -1,8 +1,7 @@
 streamlit
 numpy
 pandas
-statsmodels.api
+statsmodels
 pickle
-statsmodels.iolib.smpickle
 requests
 os
