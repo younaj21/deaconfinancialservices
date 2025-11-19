@@ -164,8 +164,11 @@ ALL_FEATURES = [
 
 
 # Add header image
-if os.path.exists("DFS_logo.png"):
-    st.image("DFS_logo.png", use_container_width=True)
+if os.path.exists("DFS_headliner.png"):
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.image("DFS_headliner.png", use_container_width=True)
+    st.markdown("---")
 
 # Title
 st.title("🎯 DFS Fraud Detection Model")
