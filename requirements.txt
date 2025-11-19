@@ -4,3 +4,5 @@ pandas
 statsmodels.api
 pickle
 statsmodels.iolib.smpickle
+requests
+os
