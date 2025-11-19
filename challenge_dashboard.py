@@ -8,23 +8,17 @@ import requests
 import os
 
 # Things to do and add for this app
-#1. Import the real model
-#2. Set up all of the real features # <--- basically done
-    # create a dataframe that contains all of the feature infomation such as the average, min, max, mode for categorical and etc
-#3. Create an expected value calculation for letting someone through if they are fraud
-#4. Allow for the option to enter the 'cost' of false negatives or maybe provide a graph instead
-#5. Remember all of this would need to be ready by Thursday morning
-#6. Place a QR code in the app somewhere? Or make it accessible by QR code?
-#7. Do research regarding what needs to happen for this to be deployed so it can be accessed on their devices
-#8. Organize the variables and the overall page to look like less of a shit show
+#1. Re run the model with feature selection performed
+    # aka remove the variables that were removed as options
+#2. Create the qr code functionality
+#3. Clean up the structure of the app
+    # Remove the unneeded shit
+    # Re organize the structure of the variables
 
-# Remove days since requesst from the final model
-# Fix the Jan, January situation
-# FOr these categorical ones make sure to remove the option to even select them from the model
 
 
 # Page configuration
-st.set_page_config(page_title="Logistic Regression Predictor", layout="wide")
+st.set_page_config(page_title="Deacon Financial Services: Fraud Detection Model", layout="wide")
 
 @st.cache_resource
 def download_model_from_gdrive(file_id, destination):
@@ -124,43 +118,57 @@ loaded_model = model  # Keep this for consistency with your existing code
 
 # Define all available features
 ALL_FEATURES = [
+    # Financial metrics
     {'name': 'income', 'label': 'Income', 'type': 'number', 'min': 0.0, 'max': 1.0, 'default': 0.5},
-    {'name': 'name_email_similarity', 'label': 'Name Email Similarity', 'type': 'number', 'min': 0.0, 'max': 1.0, 'default': 0.5},
-    {'name': 'salary', 'label': 'Salary', 'type': 'number', 'min': 10000, 'max': 200000, 'default': 84000},
-    {'name': 'current_address_months_count', 'label': 'Current Address Months Count', 'type': 'number', 'min': 0, 'max': 600, 'default': 50},
-    {'name': 'customer_age', 'label': 'Customer Age', 'type': 'number', 'min': 10, 'max': 100, 'default': 30},
-    {'name': 'days_since_request', 'label': 'Days Since Request', 'type': 'number', 'min': 0, 'max': 365, 'default': 30}, # cook this variable it stinks
     {'name': 'payment_type', 'label': 'Payment Type', 'type': 'categorical', 'options': ['AA', 'AB', 'AC', 'AD', 'AE', 'Missing'], 'default': 'AB'},
-    {'name': 'zip_count_4w', 'label': 'Zip Count 4w', 'type': 'number', 'min': 1, 'max': 6000, 'default': 1200},
-    {'name': 'velocity_6h', 'label': 'Velocity 6h', 'type': 'number', 'min': 0, 'max': 17000, 'default': 5300},
-    {'name': 'velocity_24h', 'label': 'Velocity 24h', 'type': 'number', 'min': 1300, 'max': 10000, 'default': 4700},
-    {'name': 'velocity_4w', 'label': 'Velocity 4w', 'type': 'number', 'min': 2800, 'max': 7000, 'default': 4900},
-    {'name': 'bank_branch_count_8w', 'label': 'Bank Branch Count 8w', 'type': 'number', 'min': 0, 'max': 2400, 'default': 9},
-    {'name': 'date_of_birth_distinct_emails_4w', 'label': 'DOB Distinct Emails 4w', 'type': 'number', 'min': 0, 'max': 40, 'default': 9},
-    {'name': 'employment_status', 'label': 'Employment Status', 'type': 'categorical', 'options': ['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'Missing'], 'default': 'CA'},
     {'name': 'credit_risk_score', 'label': 'Credit Risk Score', 'type': 'number', 'min': -170, 'max': 390, 'default': 120},
-    {'name': 'email_is_free', 'label': 'Email Is Free', 'type': 'boolean', 'default': True},
-    {'name': 'housing_status', 'label': 'Housing Status', 'type': 'categorical', 'options': ['BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'Missing'], 'default': 'BC'},
-    {'name': 'phone_home_valid', 'label': 'Phone Home Valid', 'type': 'boolean', 'default': True},
-    {'name': 'phone_mobile_valid', 'label': 'Phone Mobile Valid', 'type': 'boolean', 'default': True},
-    {'name': 'has_other_cards', 'label': 'Has Other Cards', 'type': 'boolean', 'default': False},
     {'name': 'proposed_credit_limit', 'label': 'Proposed Credit Limit', 'type': 'number', 'min': 200, 'max': 2000, 'default': 200},
-    {'name': 'foreign_request', 'label': 'Foreign Request', 'type': 'boolean', 'default': False},
-    {'name': 'source', 'label': 'Source', 'type': 'categorical', 'options': ['INTERNET', 'TELEAPP', 'Missing'], 'default': 'INTERNET'},
-    {'name': 'session_length_in_minutes', 'label': 'Session Length (Minutes)', 'type': 'number', 'min': 0, 'max': 90, 'default': 5},
-    {'name': 'device_os', 'label': 'Device OS', 'type': 'categorical', 'options': ['linux', 'macintosh', 'Missing', 'other', 'windows', 'x11'], 'default': 'other'},
-    {'name': 'keep_alive_session', 'label': 'Keep Alive Session', 'type': 'boolean', 'default': True},
-    {'name': 'device_distinct_emails_8w', 'label': 'Device Distinct Emails 8w', 'type': 'number', 'min': 0, 'max': 2, 'default': 1},
+    {'name': 'intended_balcon_amount_bucket', 'label': 'Intended Balance Amount', 'type': 'categorical', 'options': ['<$20', '$20-$40', '$40-$80', '$80-$100', '$100+', 'Unknown'], 'default': 'Unknown'},
+    {'name': 'has_other_cards', 'label': 'Has Other Cards', 'type': 'boolean', 'default': False},
+
+    # Demographic / User Info
+    {'name': 'customer_age', 'label': 'Customer Age', 'type': 'number', 'min': 10, 'max': 100, 'default': 30},
+    {'name': 'employment_status', 'label': 'Employment Status', 'type': 'categorical', 'options': ['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'Missing'], 'default': 'CA'},
+    {'name': 'housing_status', 'label': 'Housing Status', 'type': 'categorical', 'options': ['BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'Missing'], 'default': 'BC'},
+    {'name': 'prev_address_count_bucket', 'label': 'Reported Time at Previous Address', 'type': 'categorical', 'options': ['0-12 Months', '1-2 Years', '3-5 Years', '5-10 Years', '10+ Years', 'Unknown'], 'default': 'Unknown'},
+    {'name': 'bank_months_count_bucket', 'label': 'Time With Bank', 'type': 'categorical', 'options': ['1 Month', '1-3 Months', '3-12 Months', '12-24 Months', '24+ Months', 'Unknown'], 'default': 'Unknown'},
+
+    # Application Info
     {'name': 'month', 'label': 'Month', 'type': 'categorical', 'options': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'Missing'], 'default': 'January'},
+    {'name': 'device_os', 'label': 'Device OS', 'type': 'categorical', 'options': ['linux', 'macintosh', 'Missing', 'other', 'windows', 'x11'], 'default': 'other'},
+    {'name': 'source', 'label': 'Source', 'type': 'categorical', 'options': ['INTERNET', 'TELEAPP', 'Missing'], 'default': 'INTERNET'},
+    {'name': 'foreign_request', 'label': 'Foreign Request', 'type': 'boolean', 'default': False},
+    {'name': 'keep_alive_session', 'label': 'Keep Alive Session', 'type': 'boolean', 'default': True},
+    {'name': 'zip_count_4w', 'label': 'Zip Count 4w', 'type': 'number', 'min': 1, 'max': 6000, 'default': 1200},
+    {'name': 'bank_branch_count_8w', 'label': 'Bank Branch Count 8w', 'type': 'number', 'min': 0, 'max': 2400, 'default': 9},
+    {'name': 'device_distinct_emails_8w', 'label': 'Device Distinct Emails 8w', 'type': 'number', 'min': 0, 'max': 2, 'default': 1},
+
+    # Personal information of phone and email
+    {'name': 'name_email_similarity', 'label': 'Name Email Similarity', 'type': 'number', 'min': 0.0, 'max': 1.0, 'default': 0.5},
+    {'name': 'email_is_free', 'label': 'Email Is Free', 'type': 'boolean', 'default': True},
     {'name': 'email_domain', 'label': 'Email Domain', 'type': 'categorical', 'options': ['aol.com', 'agency.io', 'zoho.com', 'protonmail.com', 'business.org', 'yandex.com', 'consulting.co', 'icloud.com', 'work.net', 'finance.pro', 'lawfirm.legal', 'gmx.com', 'company.com', 'startup.biz', 'tech.info', 'Missing', 'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'other'], 'default': 'gmail.com'},
-    {'name': 'prev_address_count_bucket', 'label': 'Previous Address Count Bucket', 'type': 'categorical', 'options': ['0-12 Months', '1-2 Years', '3-5 Years', '5-10 Years', '10+ Years', 'Unknown'], 'default': 'Unknown'},
-    {'name': 'estimated_age', 'label': 'Estimated Age', 'type': 'number', 'min': 10, 'max': 100, 'default': 35},
-    {'name': 'bank_months_count_bucket', 'label': 'Bank Months Count Bucket', 'type': 'categorical', 'options': ['1 Month', '1-3 Months', '3-12 Months', '12-24 Months', '24+ Months', 'Unknown'], 'default': 'Unknown'},
-    {'name': 'intended_balcon_amount_bucket', 'label': 'Intended Balance Amount Bucket', 'type': 'categorical', 'options': ['<$20', '$20-$40', '$40-$80', '$80-$100', '$100+', 'Unknown'], 'default': 'Unknown'},
+    {'name': 'date_of_birth_distinct_emails_4w', 'label': 'DOB Distinct Emails 4w', 'type': 'number', 'min': 0, 'max': 40, 'default': 9},
+    {'name': 'phone_home_valid', 'label': 'Phone Home Valid', 'type': 'boolean', 'default': True},
+    {'name': 'phone_mobile_valid', 'label': 'Phone Mobile Valid', 'type': 'boolean', 'default': True}
+
+    
+    #{'name': 'salary', 'label': 'Salary', 'type': 'number', 'min': 10000, 'max': 200000, 'default': 84000},
+    #{'name': 'current_address_months_count', 'label': 'Current Address Months Count', 'type': 'number', 'min': 0, 'max': 600, 'default': 50},
+    #{'name': 'days_since_request', 'label': 'Days Since Request', 'type': 'number', 'min': 0, 'max': 365, 'default': 30}, # cook this variable it stinks
+    #{'name': 'velocity_6h', 'label': 'Velocity 6h', 'type': 'number', 'min': 0, 'max': 17000, 'default': 5300},
+    #{'name': 'velocity_24h', 'label': 'Velocity 24h', 'type': 'number', 'min': 1300, 'max': 10000, 'default': 4700},
+    #{'name': 'velocity_4w', 'label': 'Velocity 4w', 'type': 'number', 'min': 2800, 'max': 7000, 'default': 4900},
+    #{'name': 'session_length_in_minutes', 'label': 'Session Length (Minutes)', 'type': 'number', 'min': 0, 'max': 90, 'default': 5},
+    #{'name': 'estimated_age', 'label': 'Estimated Age', 'type': 'number', 'min': 10, 'max': 100, 'default': 35},
 ]
 
+
+# Add header image
+if os.path.exists("DFS_logo.png"):
+    st.image("DFS_logo.png", use_container_width=True)
+
 # Title
-st.title("🎯 Logistic Regression Predictor")
+st.title("🎯 DFS Fraud Detection Model")
 st.markdown("---")
 
 # Sidebar for feature selection
@@ -369,27 +377,3 @@ else:
                 </div>
         """, unsafe_allow_html=True)
 
-    # Additional info in expander
-    with st.expander("📋 View Input Summary"):
-        st.json(input_values)
-
-# Instructions
-st.markdown("---")
-st.subheader("📖 How to Use")
-st.markdown("""
-1. **Adjust Input Values**: Use the input fields to enter values for each feature
-2. **Toggle Features**: Use the sidebar to show/hide specific features and reduce clutter
-3. **View Prediction**: The prediction updates automatically as you change values
-4. **Replace Mock Model**: Update the `load_model()` function with your actual trained model
-
-**To use your own model:**
-```python
-@st.cache_resource
-def load_model():
-    with open('your_model.pkl', 'rb') as f:
-        model = pickle.load(f)
-    return model
-```
-
-Then use `model.predict_proba()` with your feature values formatted as needed by your model.
-""")
