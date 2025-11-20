@@ -258,7 +258,7 @@ else:
     st.markdown("---")
 
     # Make prediction
-    st.header("🎲 Prediction Result")
+    st.header("🎲 Fraud Prediction")
     
     #probability = model.predict_proba(input_values)
     # Prepare input for model
@@ -274,20 +274,20 @@ else:
     prediction_proba = loaded_model.predict(model_input)[0]
     probability = float(prediction_proba)
 
-    predicted_class = "Positive" if probability >= 0.5 else "Negative"
+    predicted_class = "Fraud" if probability >= 0.5 else "Legitimate"
     
     # Display prediction in columns
     col1, col2, col3 = st.columns([2, 2, 1])
     
     with col1:
         st.metric(
-            label="Probability of Positive Class",
+            label="Probability of Fraudulent Application",
             value=f"{probability * 100:.2f}%"
         )
     
     with col2:
         st.metric(
-            label="Predicted Class",
+            label="Prediction",
             value=predicted_class
         )
     
