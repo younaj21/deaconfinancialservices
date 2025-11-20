@@ -293,7 +293,7 @@ else:
     
     with col3:
         # Color indicator
-        if probability >= 0.5:
+        if probability >= 0.012711:
             st.success("✓")
         else:
             st.error("✗")
