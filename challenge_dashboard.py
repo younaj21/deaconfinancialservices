@@ -274,7 +274,7 @@ else:
     prediction_proba = loaded_model.predict(model_input)[0]
     probability = float(prediction_proba)
 
-    predicted_class = "Fraud" if probability >= 0.5 else "Legitimate"
+    predicted_class = "Fraud" if probability >= 0.012711 else "Legitimate"
     
     # Display prediction in columns
     col1, col2, col3 = st.columns([2, 2, 1])
