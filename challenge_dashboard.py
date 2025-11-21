@@ -322,7 +322,7 @@ else:
                     'Customer Lifetime Value',
                     min_value=0,
                     max_value=20000,
-                    value=1000,
+                    value=1600,
                     key=f"input_cusLoss"
                 )
         input_values['cusLTV'] = float(value)
